@@ -7,7 +7,7 @@ exports.getEmployees = async (req, res) => {
     }
     catch (error) {
         console.log(error);
-        req.status(500).send(error.message);
+        res.status(500).send(error.message);
     }
 }
 
@@ -24,6 +24,21 @@ exports.addEmployee = async (req, res) => {
     }
     catch (error) {
         console.log(error);
-        req.status(500).send(error.message);
+        res.status(500).send(error.message);
+    }
+}
+
+exports.deleteEmployee = async (req, res) => {
+    try {
+        await Employee.destroy({
+            where: {
+                id: req.params.id
+            }
+        })
+        res.send('Сотрудник удален успешно')
+    }
+    catch (error) {
+        console.log(error);
+        res.status(500).send(error.message);
     }
 }
