@@ -25,7 +25,6 @@ const modelFiles = fs
         return isJsFile && isNotIndex && isNotTest;
     });
 
-console.log('Models to load:', modelFiles); // Проверьте, какие файлы попадают в обработку
 
 modelFiles.forEach(file => {
     const modelPath = path.join(__dirname, file);
