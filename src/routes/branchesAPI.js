@@ -4,5 +4,4 @@ const branchController = require('../controllers/branchController');
 
 router.get('/', branchController.getBranches);
 router.post('/', branchController.addBranch);
-
 module.exports = router;

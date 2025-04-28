@@ -23,9 +23,10 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
       allowNull: false,
     },
-    parentId: { // Добавлено отсутствующее поле
+    parentId: {
       type: DataTypes.INTEGER,
-      field: 'parent_id',
+      field: 'parent_id', // Соответствие имени в БД
+      allowNull: true,
       references: {
         model: 'Branch',
         key: 'id'
