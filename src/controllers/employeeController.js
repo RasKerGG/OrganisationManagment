@@ -1,4 +1,4 @@
-const { Employee} = require("../models");
+const { Employee, Branch, Position} = require("../models");
 const {Op, Sequelize} = require("sequelize");
 
 exports.getEmployees = async (req, res) => {
@@ -16,10 +16,24 @@ exports.getEmployees = async (req, res) => {
         orderOptions.push([field, order]);
 
         const employees = await Employee.findAll({
-            order: orderOptions,
+            include: [
+                {
+                    model: Branch,
+                    as: 'branch',
+                    attributes: ['name']
+                },
+                {
+                    model: Position,
+                    as: 'position',
+                    attributes: ['name']
+                }
+            ],
+            raw: true
         });
 
+
         res.json(employees);
+
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -34,7 +48,7 @@ exports.addEmployee = async (req, res) => {
             position_id: req.body.position_id,
             salary: req.body.salary,
         });
-        res.status(201).send('Запрос выполнен успешно')
+        res.redirect('/');
     }
     catch (error) {
         console.log(error);
@@ -59,7 +73,7 @@ exports.deleteEmployee = async (req, res) => {
 
 exports.getCertificate = async (req, res) => {
     try {
-        const certificate = await Employee.findAll({
+        const employees = await Employee.findAll({
             where: {
                 salary: {
                     [Op.lt]: 30000
@@ -67,12 +81,69 @@ exports.getCertificate = async (req, res) => {
                 join_date: {
                     [Op.lt]: Sequelize.literal(`CURRENT_DATE - INTERVAL '3 years'`)
                 }
-            }
+            },
+            include: [
+                { model: Position, as: 'position', attributes: ['name'] }
+            ],
+            raw: true
         });
-        res.json(certificate);
-    }
-    catch (error) {
-        console.log(error);
+
+        // Форматирование данных
+        const formattedEmployees = employees.map(e => ({
+            ...e,
+            positionName: e['position.name']
+        }));
+
+        res.render('certificate', {
+            employees: formattedEmployees // Передаем данные в шаблон
+        });
+    } catch (error) {
         res.status(500).send(error.message);
     }
-}
+};
+
+exports.renderEmployee = async (req, res) => {
+    try {
+        const { sortBy = 'id', order = 'ASC' } = req.query;
+        const validFields = ['id', 'fullName', 'joinDate', 'salary', 'branchName', 'positionName'];
+
+        if (!validFields.includes(sortBy)) {
+            return res.status(400).send('Некорректное поле');
+        }
+
+        // Настройка сортировки
+        let orderOption;
+        if (sortBy === 'branchName') {
+            orderOption = [[{ model: Branch, as: 'branch' }, 'name', order]];
+        } else if (sortBy === 'positionName') {
+            orderOption = [[{ model: Position, as: 'position' }, 'name', order]];
+        } else {
+            orderOption = [[sortBy, order]];
+        }
+
+        const employees = await Employee.findAll({
+            order: orderOption,
+            include: [
+                { model: Branch, as: 'branch', attributes: ['name'] },
+                { model: Position, as: 'position', attributes: ['name'] }
+            ],
+            raw: true
+        });
+
+        // Форматирование данных
+        const formattedEmployees = employees.map(e => ({
+            ...e,
+            branchName: e['branch.name'],
+            positionName: e['position.name']
+        }));
+
+        res.render('employees', {
+            employees: formattedEmployees,
+            sortBy,
+            order
+        });
+
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+};

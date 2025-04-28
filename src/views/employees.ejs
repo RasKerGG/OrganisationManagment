@@ -10,8 +10,30 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.min.js" integrity="sha384-VQqxDN0EQCkWoxt/0vsQvZswzTHUVOImccYmSyhJTp7kGtPed0Qcx8rK9h9YEgx+" crossorigin="anonymous"></script>
 </head>
 <body>
-    <main>
-        <%- include('sidebar') %>
-    </main>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3 col-lg-2 bg-light p-3">
+            <%- include('sidebar') %>
+        </div>
+        <div class="col-md-9 col-lg-10 p-4">
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                <% employees.forEach(employee => { %>
+                    <div class="col">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h2 class="card-title"><%= employee.fullName %></h2>
+                                <p class="card-text">ID: <%= employee.id %></p>
+                                <p class="card-text">Должность: <%= employee.positionName || "Н/Д" %></p>
+                                <p class="card-text">Филиал: <%= employee.branchName || "Н/Д" %></p>
+                                <p class="card-text">Дата приема: <%= employee.joinDate %></p>
+                                <p class="card-text">Зарплата: <%= employee.salary %></p>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
